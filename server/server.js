@@ -16,9 +16,23 @@ app.use(express.static(publicPath));
 io.on('connection', (socket) => {
   console.log('New user connected');
 
+  socket.emit('newMessage', {
+    from: 'Admin',
+    text: 'Welcome to chat app',
+    createdAt: new Date().getTime()
+  })
+
+  // send it to all sockets except the current socket
+  socket.broadcast.emit('newMessage', {
+    from: 'Admin',
+    text: 'New User joined',
+    createdAt: new Date().getTime()
+  })
+
 
   socket.on('createMessage', (message) => {
     console.log('createMessage', message);
+
     // for broadcast use io instead of socket
     io.emit('newMessage', {
       from: message.from,
