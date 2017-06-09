@@ -4,6 +4,24 @@
 // We override the default behaviour using jquery -->
 
 var socket = io();
+
+function scrollToBottom() {
+  var messages = jQuery('#messages');
+  var clientHeight = messages.prop('clientHeight'); // prop() cross-browser way of getting a property
+  var scrollTop = messages.prop('scrollTop'); // current top of the scroll.. 0 when an top
+  var scrollHeight = messages.prop('scrollHeight'); // total height of the container
+
+  var newMessage = messages.children('li:last-child');
+  var newMessageHeight = newMessage.innerHeight();
+  var lastMessageHeight = newMessage.prev().innerHeight();
+
+  var threshold = newMessageHeight + lastMessageHeight; // beyond this threshold dont autoscroll..
+
+  if (scrollTop > scrollHeight-clientHeight-threshold) {
+    messages.scrollTop(scrollHeight-clientHeight); // set scrollTop to total height : bring to bottom
+  }
+}
+
 socket.on('connect', function () {
   console.log('connected to server');
 
@@ -22,6 +40,7 @@ socket.on('newMessage', function (message) {
     createdAt: formattedTime
   });
   jQuery('#messages').append(html);
+  scrollToBottom();
 
 
   // var formattedTime = moment(message.createdAt).format('h:mm a');
@@ -41,6 +60,7 @@ socket.on('newLocationMessage', function(message) {
     createdAt: formattedTime
   });
   jQuery('#messages').append(html);
+  scrollToBottom();
 
 
 
