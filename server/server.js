@@ -32,7 +32,6 @@ app.use(express.static(publicPath));
 var users = new Users();
 
 io.on('connection', (socket) => {
-  console.log('New user connected');
 
   // <<< JOIN Room
   socket.on(evJOIN, (params, callback) => {
@@ -46,6 +45,8 @@ io.on('connection', (socket) => {
 
     socket.join(params.room);
     users.addUser(socket.id, params.name, params.room);
+
+    console.log(`${params.name} joined ${params.room}`);
 
     // >>> WELCOME Message
     socket.emit(evSERVER_MESSAGE, generateMessage('Admin','Welcome to chat app'));
@@ -62,16 +63,16 @@ io.on('connection', (socket) => {
   socket.on(evCLIENT_MESSAGE, (message, callback) => {
 
     // >>> Broadcast user message - for broadcast use io instead of socket
-
-    var user = users.getUser(socket.id);
-    io.emit(evSERVER_MESSAGE, generateMessage(user.name, message.text));
-    callback('This is from server');
+    if(isRealString(message.text)) {
+      var user = users.getUser(socket.id);
+      io.to(user.room).emit(evSERVER_MESSAGE, generateMessage(user.name, message.text));
+    }
   })
 
 
   socket.on(evCLIENT_MESSAGE_LOC, (coords) => {
     var user = users.getUser(socket.id);
-    io.emit(evSERVER_MESSAGE_LOC, generateLocationMessage(user.name, coords.latitude, coords.longitude));
+    io.to(user.room).emit(evSERVER_MESSAGE_LOC, generateLocationMessage(user.name, coords.latitude, coords.longitude));
   })
 
   socket.on('disconnect', () => {
@@ -83,7 +84,7 @@ io.on('connection', (socket) => {
     // >>> USER Left
     io.to(user.room).emit(evSERVER_MESSAGE, generateMessage('Admin', `${user.name} left`));
 
-    console.log('User disconnected');
+    console.log(`${user.name} left ${user.room}`);
   })
 })
 
