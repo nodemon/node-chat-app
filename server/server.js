@@ -17,6 +17,8 @@ const evSERVER_MESSAGE = 'newMessage';
 const evCLIENT_MESSAGE_LOC = 'createLocationMessage';
 const evSERVER_MESSAGE_LOC = 'newLocationMessage';
 const evUSER_NAMES = 'userNames';
+const evGET_ROOM_NAMES = 'getRoomNames';
+const evCREATE_ROOM = 'createRoom';
 
 /*
   Express and socket.io don't play well together but they are ok with the http module
@@ -31,12 +33,49 @@ app.use(express.static(publicPath));
 
 var users = new Users();
 
+var roomNames = [];
+
 io.on('connection', (socket) => {
+
+  // REQUEST for Existing rooms
+  socket.on(evGET_ROOM_NAMES, (params, callback) => {
+    callback(roomNames);
+  });
+
+  // Create Room
+  socket.on(evCREATE_ROOM, (roomName, callback) => {
+    if (roomNames.find((room) => room.toLowerCase() === roomName.toLowerCase())) {
+      callback('Room already exists')
+    }
+    else {
+      roomNames.push(roomName)
+      callback();
+    }
+  });
 
   // <<< JOIN Room
   socket.on(evJOIN, (params, callback) => {
-    if (!isRealString(params.name) || !isRealString(params.room)) {
-      callback ('Name and Room name are required');
+    var userName = params.name;
+    var roomName = params.room;
+
+    if (!isRealString(userName) || !isRealString(roomName)) {
+      return callback ('Name and Room name are required');
+    }
+
+    if (userName.toLowerCase() === 'admin') {
+      return callback ('Cannot use Admin');
+    }
+
+    var user = users.getUserByName(userName);
+
+    // user already exists
+    if (user) {
+      return callback ('Display name already taken');
+    }
+
+    var existingRoom = roomNames.find((room) => room.toLowerCase() === roomName.toLowerCase());
+    if (!existingRoom) {
+      roomNames.push(roomName);
     }
 
         // socket.leave(roomName) - to leave room
@@ -49,7 +88,7 @@ io.on('connection', (socket) => {
     console.log(`${params.name} joined ${params.room}`);
 
     // >>> WELCOME Message
-    socket.emit(evSERVER_MESSAGE, generateMessage('Admin','Welcome to chat app'));
+    socket.emit(evSERVER_MESSAGE, generateMessage('Admin',`Welcome to ${roomName}`));
 
     // >>> USER Joined - send it to all sockets in room except the current socket
     socket.broadcast.to(params.room).emit(evSERVER_MESSAGE, generateMessage('Admin', `${params.name} joined`));
@@ -78,13 +117,16 @@ io.on('connection', (socket) => {
   socket.on('disconnect', () => {
     var user = users.removeUser(socket.id);
 
-    // >>> USERLIST
-    io.to(user.room).emit(evUSER_NAMES, users.getUserNames(user.room));
+    if (user) {
+      // >>> USERLIST
+      io.to(user.room).emit(evUSER_NAMES, users.getUserNames(user.room));
 
-    // >>> USER Left
-    io.to(user.room).emit(evSERVER_MESSAGE, generateMessage('Admin', `${user.name} left`));
+      // >>> USER Left
+      io.to(user.room).emit(evSERVER_MESSAGE, generateMessage('Admin', `${user.name} left`));
 
-    console.log(`${user.name} left ${user.room}`);
+      console.log(`${user.name} left ${user.room}`);
+    }
+
   })
 })
 

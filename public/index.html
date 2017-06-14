@@ -5,29 +5,49 @@
   <title>Join | ChatApp</title>
   <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no"> <!-- For better rendering on mobile-->
   <link rel='stylesheet' href="/css/styles.css">
+  <script src='/js/libs/jquery-3.2.1.min.js'></script>
+
 </head>
 
 <body class="centered-form">
   <div class="centered-form__form">
-    <form action='/chat.html'><!-- passes the params to chat.html -->
+    <form id= 'form_login' action='/chat.html'><!-- passes the params to chat.html -->
       <div class="form-field">
         <h3>Join a Chat</h3>
       </div>
       <div class="form-field">
         <label>Display name</label>
-        <input type='text' name='name' autofocus/>
+        <input type='text' name='name' id='name' autofocus/>
       </div>
       <div class="form-field">
-        <label>Room name</label>
-        <input type='text' name='room' autofocus/>
+        <label>Select a Room</label>
+        <select name="room" id='room'>
+        </select>
+      </div>
+
+      <div class="form-field">
+        <button id="btn_join">Join</button>
       </div>
       <div class="form-field">
-        <button>Join</button>
+        <br/>
+        <hr>
+        <br/>
       </div>
-    </form>
+    <form>
+
+    <div class="form-field">
+      <label>Create a chat room</label>
+      <input type='text' id='create_room' autofocus/> <!-- The name attribute is used when sending data in a form submission ..
+         dont provide name if field is not intended to be part of the form -->
+    </div>
+    <div class="form-field">
+      <button id="btn_create"  type="button"  onclick="createRoom()">Create</button>
+    </div>
+
   </div>
+
   <script src="/socket.io/socket.io.js"></script>
-  <script src='/js/libs/jquery-3.2.1.min.js'></script>
+  <script src="/js/index.js"></script>
   <script src="/js/libs/moment.js"></script>  <!-- Copied moment from node_modules/ and referencing it -->
   <script src="/js/libs/mustache.js"></script> <!-- https://raw.githubusercontent.com/janl/mustache.js/v2.3.0/mustache.js -->
 </body>

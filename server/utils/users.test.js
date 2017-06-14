@@ -31,12 +31,12 @@ describe('Users', () => {
     expect(users.userList).toEqual([user]);
   })
 
-  it('should returns names for room stark', () => {
+  it('should return names for room stark', () => {
     var userList = users.getUserNames('stark');
     expect(userList).toEqual(['Ned', 'John']);
   });
 
-  it('should returns names for room targ', () => {
+  it('should return names for room targ', () => {
     var userList = users.getUserNames('targ');
     expect(userList).toEqual(['Dan']);
   });
@@ -71,4 +71,14 @@ describe('Users', () => {
     var user = users.getUser('0');
     expect(user).toNotExist();
   });
+
+  it('should find user with name ', () => {
+    var user = users.getUserByName('Ned');
+    expect(user).toEqual({
+      id: '1',
+      name: 'Ned',
+      room: 'stark'
+    });
+  });
+
 })

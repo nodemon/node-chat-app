@@ -27,6 +27,7 @@ function scrollToBottom() {
   }
 }
 
+// first time chat page is loaded.. connection established with server
 socket.on('connect', function () {
   // Retrieve parameters from URL
   var params = jQuery.deparam(window.location.search);
@@ -50,12 +51,12 @@ socket.on('disconnect', function () {
 
 socket.on(evUSER_NAMES, function (userNames) {
   // update user list
-  var ol = jQuery('<ol></ol>');
+  var ul = jQuery('<ul></ul>');
   userNames.forEach( function (userName) {
-    ol.append(jQuery('<li></li>').text(userName));
+    ul.append(jQuery('<li></li>').text(userName));
   });
 
-  jQuery('#users').html(ol);
+  jQuery('#users').html(ul);
 })
 
 socket.on(evSERVER_MESSAGE, function (message) {

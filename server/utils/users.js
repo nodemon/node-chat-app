@@ -25,8 +25,15 @@ class Users {
     return userObject;
   }
 
+  // case-insensitive search
+  getUserByName(name) {
+    var userObject = this.userList.find((user) => user.name.toLowerCase() === name.toLowerCase());
+    return userObject;
+  }
+
+  // case-insensitive search
   getUserNames(room) {
-    var userObjects = this.userList.filter((user) => user.room === room); // filter: array objects which satisfy the condition get added to the result
+    var userObjects = this.userList.filter((user) => user.room.toLowerCase() === room.toLowerCase()); // filter: array objects which satisfy the condition get added to the result
     var userNames = userObjects.map((user) => user.name);   // map: selectively return the properties from an object
 
     return userNames;
